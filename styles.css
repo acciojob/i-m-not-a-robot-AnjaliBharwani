@@ -1,75 +1,64 @@
-/*  your css code here. If applicable */
 //your code here
-document.addEventListener("DOMContentLoaded", function() {
-  const imageContainer = document.getElementById("image-container");
-  const resetButton = document.getElementById("reset");
-  const verifyButton = document.getElementById("verify");
-  const para = document.getElementById("para");
+const main = document.querySelector("main");
+const verify = document.getElementById("verify");
+const reset = document.getElementById("reset");
+const para = document.getElementById("para");
 
-  let state = 1;
-  let selectedImages = [];
+// console.log(main);
+let arrClasses = ["img1" ,"img2","img3","img4","img5" ]
+let randomPhotoClass = arrClasses[Math.round(Math.random()*5)];
+// console.log(randomPhotoUrl);
+const randomPhoto = document.createElement("img");
+randomPhoto.className = randomPhotoClass;
+main.appendChild(randomPhoto);
 
-  function getRandomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
 
-  function renderImages() {
-    const imageOrder = [1, 2, 3, 4, 5];
-    const repeatedImageIndex = getRandomInt(0, 4);
-    const repeatedImageClass = `img${getRandomInt(1, 5)}`;
+const imgs = document.getElementsByTagName("img");
+let clicked = 0;
+let selected = [];
+for (let i=0 ;i<imgs.length;i++){
+    const currentImg = imgs[i];
+    currentImg.addEventListener("click",()=>{
+        selected.push(currentImg);
+        clicked++;
+        currentImg.classList.add("selected");  
+        if(clicked === 1){
+              reset.style.display = "flex";
+            reset.addEventListener("click",()=>{
+                clicked = 0;
+                for(let val of selected) val.classList.remove("selected");
+                reset.style.display = "none"; 
+                para.style.display = "none";
+            })
+        }
+        else if(clicked === 2){
+            verify.style.display = "flex";
+        }
+        else{
+            verify.style.display = "none";
+        }
+    })
+}
 
-    imageOrder.splice(repeatedImageIndex, 0, repeatedImageClass);
-
-    imageContainer.innerHTML = "";
-    imageOrder.forEach((imgClass, index) => {
-      const img = document.createElement("img");
-      img.src = `https://api.example.com/images/${imgClass}.jpg`; // Replace with your image API endpoint
-      img.classList.add(imgClass);
-      img.addEventListener("click", () => handleImageClick(imgClass));
-      imageContainer.appendChild(img);
-    });
-  }
-
-  function handleImageClick(imgClass) {
-    if (selectedImages.length < 2 && !selectedImages.includes(imgClass)) {
-      selectedImages.push(imgClass);
+verify.addEventListener("click",()=>{
+    let classes = [];
+    for(let val of selected){
+        classes.push(val.className);
     }
-
-    if (selectedImages.length === 2) {
-      verifyButton.style.display = "block";
-      state = 3;
+    let sameClass = true;
+    for(let i = 0; i < classes.length-1; i++){
+         if(classes[i] !== classes[i+1]){
+            sameClass = false;
+            break;
+         }
     }
-
-    if (selectedImages.length > 0) {
-      resetButton.style.display = "block";
-      state = 2;
+    if(sameClass === true){
+        para.style.display = "flex";
+       para.innerText = "You are a human. Congratulations!";
     }
-
-    if (selectedImages.length === 2) {
-      para.innerHTML = "";
+    else{
+        para.style.display = "flex";
+        para.innerText = "We can't verify you as a human. You selected the non-identical tiles.";
     }
-  }
-
-  function resetState() {
-    selectedImages = [];
-    resetButton.style.display = "none";
-    verifyButton.style.display = "none";
-    para.innerHTML = "";
-    state = 1;
-  }
-
-  function verify() {
-    if (selectedImages[0] === selectedImages[1]) {
-      para.innerHTML = "You are a human. Congratulations!";
-    } else {
-      para.innerHTML = "We can't verify you as a human. You selected the non-identical tiles.";
-    }
-    verifyButton.style.display = "none";
-    state = 4;
-  }
-
-  resetButton.addEventListener("click", resetState);
-  verifyButton.addEventListener("click", verify);
-
-  renderImages();
-});
+    verify.style.display = "none";
+})
